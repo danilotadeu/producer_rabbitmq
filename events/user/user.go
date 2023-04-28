@@ -13,8 +13,7 @@ type EventUserContract interface {
 }
 
 type EventUser struct {
-	rabbitMQ  *rabbitmq.RabbitMQ
-	exchanges map[string]bool
+	rabbitMQ *rabbitmq.RabbitMQ
 }
 
 func Register(rabbitMQ *rabbitmq.RabbitMQ) *EventUser {
@@ -39,8 +38,7 @@ func Register(rabbitMQ *rabbitmq.RabbitMQ) *EventUser {
 	}
 
 	return &EventUser{
-		rabbitMQ:  rabbitMQ,
-		exchanges: exchanges,
+		rabbitMQ: rabbitMQ,
 	}
 }
 
