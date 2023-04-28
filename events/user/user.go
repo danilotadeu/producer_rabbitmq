@@ -22,15 +22,7 @@ func Register(rabbitMQ *rabbitmq.RabbitMQ) *EventUser {
 	}
 
 	for exchange := range exchanges {
-		err := rabbitMQ.Rabbit.ExchangeDeclare(
-			exchange,
-			"fanout",
-			true,
-			false,
-			false,
-			false,
-			nil,
-		)
+		err := rabbitMQ.Rabbit.ExchangeDeclare(exchange, "fanout", true, false, false, false, nil)
 		if err != nil {
 			log.Fatalf("Failed to declare exchange: %v", err)
 			panic(err)
