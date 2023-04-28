@@ -8,7 +8,7 @@ import (
 )
 
 type UserApp interface {
-	SendMessage(ctx context.Context, user userModel.User) error
+	UserCreate(ctx context.Context, user userModel.User) error
 }
 
 type appImpl struct {
@@ -21,7 +21,7 @@ func NewUserApp(eventUser *user.EventUser) UserApp {
 	}
 }
 
-func (a *appImpl) SendMessage(ctx context.Context, user userModel.User) error {
+func (a *appImpl) UserCreate(ctx context.Context, user userModel.User) error {
 	err := a.eventUser.UserCreated(user)
 	if err != nil {
 		return err

@@ -23,7 +23,7 @@ func (p *apiImpl) createUser(c *fiber.Ctx) error {
 	c.BodyParser(&request)
 	ctx := c.Context()
 
-	err := p.userApp.User.SendMessage(ctx, request)
+	err := p.userApp.User.UserCreate(ctx, request)
 	if err != nil {
 		return c.JSON("Por favor tente novamente mais tarde")
 	}
