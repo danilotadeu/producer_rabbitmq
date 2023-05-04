@@ -9,7 +9,7 @@ type Container struct {
 	User userApp.UserApp
 }
 
-func Register(userEvent *userEvent.EventUser) *Container {
+func Register(userEvent userEvent.EventUserContract) *Container {
 	return &Container{
 		User: userApp.NewUserApp(userEvent),
 	}

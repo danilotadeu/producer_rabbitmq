@@ -2,10 +2,10 @@ package user
 
 import (
 	"encoding/json"
-	"log"
 
 	"github.com/producer_rabbitmq/model/user"
 	"github.com/producer_rabbitmq/rabbitmq"
+	rabbit "github.com/wagslane/go-rabbitmq"
 )
 
 type EventUserContract interface {
@@ -13,24 +13,14 @@ type EventUserContract interface {
 }
 
 type EventUser struct {
-	rabbitMQ *rabbitmq.RabbitMQ
+	rabbitMQ  *rabbitmq.RabbitMQ
+	Exchanges map[string]*rabbit.Publisher
 }
 
-func Register(rabbitMQ *rabbitmq.RabbitMQ) *EventUser {
-	exchanges := map[string]bool{
-		"user_created": true,
-	}
-
-	for exchange := range exchanges {
-		err := rabbitMQ.Rabbit.ExchangeDeclare(exchange, "fanout", true, false, false, false, nil)
-		if err != nil {
-			log.Fatalf("Failed to declare exchange: %v", err)
-			panic(err)
-		}
-	}
-
+func NewEvent(rabbitMQConnection *rabbitmq.RabbitMQ, exchanges map[string]*rabbit.Publisher) EventUserContract {
 	return &EventUser{
-		rabbitMQ: rabbitMQ,
+		Exchanges: exchanges,
+		rabbitMQ:  rabbitMQConnection,
 	}
 }
 
@@ -40,7 +30,7 @@ func (e *EventUser) UserCreated(user user.User) error {
 		return err
 	}
 
-	err = e.rabbitMQ.SendMessage("user_created", jsonData)
+	err = e.rabbitMQ.SendMessage(e.Exchanges["user_created"], "user_created", []string{""}, jsonData)
 	if err != nil {
 		return err
 	}

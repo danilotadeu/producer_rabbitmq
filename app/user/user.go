@@ -12,10 +12,10 @@ type UserApp interface {
 }
 
 type appImpl struct {
-	eventUser *user.EventUser
+	eventUser user.EventUserContract
 }
 
-func NewUserApp(eventUser *user.EventUser) UserApp {
+func NewUserApp(eventUser user.EventUserContract) UserApp {
 	return &appImpl{
 		eventUser: eventUser,
 	}

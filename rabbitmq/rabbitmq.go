@@ -3,19 +3,18 @@ package rabbitmq
 import (
 	"log"
 
-	"github.com/streadway/amqp"
+	rabbitmq "github.com/wagslane/go-rabbitmq"
 )
 
 type RabbitMQQueue interface {
 	Connect() *RabbitMQ
-	SendMessage(exchange string, message []byte) error
+	SendMessage(exchangePublisher *rabbitmq.Publisher, exchange string, routingKey []string, message []byte) error
 }
 
 type RabbitMQ struct {
-	Url     string
-	Rabbit  *amqp.Channel
-	Conn    *amqp.Connection
-	Channel *amqp.Channel
+	Url       string
+	Conn      *rabbitmq.Conn
+	Exchanges map[string]*rabbitmq.Publisher
 }
 
 func NewRabbitMQ(url string) RabbitMQQueue {
@@ -25,38 +24,47 @@ func NewRabbitMQ(url string) RabbitMQQueue {
 }
 
 func (r *RabbitMQ) Connect() *RabbitMQ {
-	conn, err := amqp.Dial(r.Url)
+	conn, err := rabbitmq.NewConn(
+		r.Url,
+		rabbitmq.WithConnectionOptionsLogging,
+	)
 	if err != nil {
-		log.Fatalf("Failed to connect to RabbitMQ: %v", err)
-		panic(err)
-	}
-
-	ch, err := conn.Channel()
-	if err != nil {
-		log.Fatalf("Failed to open a channel: %v", err)
-		panic(err)
+		log.Fatal(err)
 	}
 
 	return &RabbitMQ{
-		Rabbit:  ch,
-		Conn:    conn,
-		Channel: ch,
+		Conn: conn,
 	}
 }
 
-func (r *RabbitMQ) SendMessage(exchange string, message []byte) error {
-	err := r.Rabbit.Publish(
-		exchange,
-		"",
-		false,
-		false,
-		amqp.Publishing{
-			ContentType: "application/json",
-			Body:        []byte(message),
-		},
+func (r *RabbitMQ) RegisterExchanges(exchanges map[string]string) map[string]*rabbitmq.Publisher {
+	exchangesPublisher := make(map[string]*rabbitmq.Publisher)
+	for exchange := range exchanges {
+		publisher, err := rabbitmq.NewPublisher(
+			r.Conn,
+			rabbitmq.WithPublisherOptionsLogging,
+			rabbitmq.WithPublisherOptionsExchangeName(exchange),
+			rabbitmq.WithPublisherOptionsExchangeDeclare,
+			rabbitmq.WithPublisherOptionsExchangeKind("fanout"),
+			rabbitmq.WithPublisherOptionsExchangeDurable,
+		)
+		if err != nil {
+			panic(err)
+		}
+		exchangesPublisher[exchange] = publisher
+	}
+
+	return exchangesPublisher
+}
+
+func (r *RabbitMQ) SendMessage(exchangePublisher *rabbitmq.Publisher, exchange string, routingKey []string, message []byte) error {
+	err := exchangePublisher.Publish(
+		message,
+		routingKey,
+		rabbitmq.WithPublishOptionsContentType("application/json"),
+		rabbitmq.WithPublishOptionsExchange(exchange),
 	)
 	if err != nil {
-		log.Fatalf("Failed to publish message: %v", err)
 		return err
 	}
 	return nil
