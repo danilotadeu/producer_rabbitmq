@@ -39,13 +39,13 @@ func (r *RabbitMQ) Connect() *RabbitMQ {
 
 func (r *RabbitMQ) RegisterExchanges(exchanges map[string]string) map[string]*rabbitmq.Publisher {
 	exchangesPublisher := make(map[string]*rabbitmq.Publisher)
-	for exchange := range exchanges {
+	for exchange, exchangeKind := range exchanges {
 		publisher, err := rabbitmq.NewPublisher(
 			r.Conn,
 			rabbitmq.WithPublisherOptionsLogging,
 			rabbitmq.WithPublisherOptionsExchangeName(exchange),
 			rabbitmq.WithPublisherOptionsExchangeDeclare,
-			rabbitmq.WithPublisherOptionsExchangeKind("fanout"),
+			rabbitmq.WithPublisherOptionsExchangeKind(exchangeKind),
 			rabbitmq.WithPublisherOptionsExchangeDurable,
 		)
 		if err != nil {
