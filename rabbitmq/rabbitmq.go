@@ -1,8 +1,6 @@
 package rabbitmq
 
 import (
-	"log"
-
 	rabbitmq "github.com/wagslane/go-rabbitmq"
 )
 
@@ -12,9 +10,8 @@ type RabbitMQQueue interface {
 }
 
 type RabbitMQ struct {
-	Url       string
-	Conn      *rabbitmq.Conn
-	Exchanges map[string]*rabbitmq.Publisher
+	Url  string
+	Conn *rabbitmq.Conn
 }
 
 func NewRabbitMQ(url string) RabbitMQQueue {
@@ -29,7 +26,7 @@ func (r *RabbitMQ) Connect() *RabbitMQ {
 		rabbitmq.WithConnectionOptionsLogging,
 	)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	return &RabbitMQ{

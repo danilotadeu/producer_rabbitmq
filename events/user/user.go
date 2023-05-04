@@ -17,10 +17,10 @@ type EventUser struct {
 	Exchanges map[string]*rabbit.Publisher
 }
 
-func NewEvent(rabbitMQConnection *rabbitmq.RabbitMQ, exchanges map[string]*rabbit.Publisher) EventUserContract {
+func NewEvent(rabbitMQ *rabbitmq.RabbitMQ, exchanges map[string]*rabbit.Publisher) EventUserContract {
 	return &EventUser{
 		Exchanges: exchanges,
-		rabbitMQ:  rabbitMQConnection,
+		rabbitMQ:  rabbitMQ,
 	}
 }
 
